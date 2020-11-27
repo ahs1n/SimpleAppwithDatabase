@@ -3,32 +3,27 @@ package com.example.simpleappwithdatabase;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
+
+import com.example.simpleappwithdatabase.databinding.ActivityMainBinding;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 public class MainActivity extends AppCompatActivity {
+
+    ActivityMainBinding bi;
+
     DatabaseHelper myDb;
-    EditText name, contact, email, id;
-    Button addData, update, viewData, delete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        myDb = new DatabaseHelper(this);
+        bi = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        bi.setCallback(this);
 
-        name = (EditText) findViewById(R.id.name);
-        contact = (EditText) findViewById(R.id.contact);
-        email = (EditText) findViewById(R.id.email);
-        id = (EditText) findViewById(R.id.id);
-        addData = (Button) findViewById(R.id.addData);
-        update = (Button) findViewById(R.id.update);
-        viewData = (Button) findViewById(R.id.viewData);
-        delete = (Button) findViewById(R.id.delete);
+        myDb = new DatabaseHelper(this);
         AddData();
         viewAll();
         updateData();
@@ -37,15 +32,28 @@ public class MainActivity extends AppCompatActivity {
 
     /*Add Data*/
     public void AddData() {
-        addData.setOnClickListener(new View.OnClickListener() {
+        bi.addData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean isInserted = myDb.insertData(name.getText().toString(),
-                        contact.getText().toString(),
-                        email.getText().toString());
-                if (isInserted == true)
+                boolean isInserted = myDb.insertData(
+                        bi.name.getText().toString(),
+                        bi.contact.getText().toString(),
+                        bi.email.getText().toString());
+
+                if (bi.name.getText().toString().isEmpty()) {
+                    bi.name.setError("Field can't be Empty");
+                    bi.name.requestFocus();
+                } else {
+                    bi.name.setError(null);
+                }
+
+                if (isInserted == true) {
+                    bi.id.setText(null);
+                    bi.contact.setText(null);
+                    bi.email.setText(null);
+                    bi.name.setText(null);
                     Toast.makeText(MainActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
-                else
+                } else
                     Toast.makeText(MainActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
             }
         });
@@ -53,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
     /*View Data*/
     public void viewAll() {
-        viewData.setOnClickListener(new View.OnClickListener() {
+        bi.viewData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Cursor result = myDb.getAllData();
@@ -77,16 +85,20 @@ public class MainActivity extends AppCompatActivity {
 
     /*Update Data*/
     public void updateData() {
-        update.setOnClickListener(new View.OnClickListener() {
+        bi.update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean isUpdated = myDb.updateData(id.getText().toString(),
-                        name.getText().toString(),
-                        contact.getText().toString(),
-                        email.getText().toString());
-                if (isUpdated == true)
+                boolean isUpdated = myDb.updateData(bi.id.getText().toString(),
+                        bi.name.getText().toString(),
+                        bi.contact.getText().toString(),
+                        bi.email.getText().toString());
+                if (isUpdated == true) {
+                    bi.id.setText(null);
+                    bi.contact.setText(null);
+                    bi.email.setText(null);
+                    bi.name.setText(null);
                     Toast.makeText(MainActivity.this, "Data Updated", Toast.LENGTH_LONG).show();
-                else
+                } else
                     Toast.makeText(MainActivity.this, "Data not Updated", Toast.LENGTH_LONG).show();
             }
         });
@@ -94,13 +106,14 @@ public class MainActivity extends AppCompatActivity {
 
     /*Delete Data*/
     public void deleteData() {
-        delete.setOnClickListener(new View.OnClickListener() {
+        bi.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Integer deleteRows = myDb.deleteData(id.getText().toString());
-                if (deleteRows > 0)
+                Integer deleteRows = myDb.deleteData(bi.id.getText().toString());
+                if (deleteRows > 0) {
+                    bi.id.setText(null);
                     Toast.makeText(MainActivity.this, "Data Deleted", Toast.LENGTH_LONG).show();
-                else
+                } else
                     Toast.makeText(MainActivity.this, "Data not Deleted", Toast.LENGTH_LONG).show();
             }
         });
